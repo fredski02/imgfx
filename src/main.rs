@@ -1,25 +1,36 @@
 use image::io::Reader as ImageReader;
 use image::{DynamicImage, ImageBuffer, Rgba};
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let img = ImageReader::open("input.png")?.decode()?;
-    let height = img.height() as usize;
-    let width = img.width() as usize;
 
-    let rgba_data = to_rgba(&img);
-    let new_data = to_raw(convolve(&rgba_data, height, width));
+mod lib;
+use lib::imgfx::ImgFx;
 
-    // Create an ImageBuffer from the raw data
-    let new_image = ImageBuffer::<Rgba<u8>, _>::from_raw(width as u32, height as u32, new_data)
-        .expect("Failed to create image buffer");
-
-    // Convert the ImageBuffer to DynamicImage
-    let dynamic_image = DynamicImage::ImageRgba8(new_image);
-
-    // Save the image
-    dynamic_image.save("output.png")?;
-
-    Ok(())
+fn main() {
+    let image_processor = ImgFx::new("input.png").unwrap();
+    // println!("{image_processor:?}");
+    // let image_processor = ImgFx::new("input.png").pixelate().save("output.png");
 }
+
+// fn main() -> Result<(), Box<dyn std::error::Error>> {
+//     let img = ImageReader::open("input.png")?.decode()?;
+//     let height = img.height() as usize;
+//     let width = img.width() as usize;
+
+//     let rgba_data = to_rgba(&img);
+//     let new_data = to_raw(convolve(&rgba_data, height, width));
+
+//     // Create an ImageBuffer from the raw data
+//     let new_image = ImageBuffer::<Rgba<u8>, _>::from_raw(width as u32, height as u32, new_data)
+//         .expect("Failed to create image buffer");
+
+//     // Convert the ImageBuffer to DynamicImage
+//     let dynamic_image = DynamicImage::ImageRgba8(new_image);
+
+//     // Save the image
+//     dynamic_image.save("output.png")?;
+
+//     Ok(())
+
+// }
 
 pub fn to_rgba(img: &DynamicImage) -> Vec<Rgba<u8>> {
     let image_data: Vec<Rgba<u8>> = img

@@ -1,10 +1,11 @@
+use image::DynamicImage;
 use rand::{thread_rng, Rng};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Matrix {
     pub rows: usize,
     pub cols: usize,
-    pub data: Vec<Vec<f64>>,
+    pub data: Vec<Vec<f32>>,
 }
 
 impl Matrix {
@@ -22,13 +23,13 @@ impl Matrix {
 
         for i in 0..rows {
             for j in 0..cols {
-                res.data[i][j] = rng.gen::<f64>() * 2.0 - 1.0
+                res.data[i][j] = rng.gen::<f32>() * 2.0 - 1.0
             }
         }
         res
     }
 
-    pub fn from(data: Vec<Vec<f64>>) -> Matrix {
+    pub fn from(data: Vec<Vec<f32>>) -> Matrix {
         Matrix {
             rows: data.len(),
             cols: data[0].len(),
@@ -96,7 +97,7 @@ impl Matrix {
         res
     }
 
-    pub fn map(&mut self, function: &dyn Fn(f64) -> f64) -> Matrix {
+    pub fn map(&mut self, function: &dyn Fn(f32) -> f32) -> Matrix {
         Matrix::from(
             self.data
                 .clone()
@@ -115,5 +116,21 @@ impl Matrix {
             }
         }
         res
+    }
+}
+
+impl Into<Matrix> for DynamicImage {
+    fn into(self) -> Matrix {
+        let img_buffer = self.to_rgba32f();
+
+        let rows_stride = img_buffer.as_flat_samples().layout.height_stride;
+
+        let e: Vec<Vec<f32>> = img_buffer
+            .into_vec()
+            .chunks_exact(rows_stride)
+            .map(|c| c.to_vec())
+            .collect();
+
+        Matrix::from(e)
     }
 }
